@@ -1,0 +1,83 @@
+# AuthLite Git Ignore
+
+# Local configuration
+config.local.php
+config.local.php.backup
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+.logs/
+
+# Server control files
+.pid
+.authlite-server.*
+
+# Session files
+sess_*
+
+# Composer
+composer.lock
+
+# Composer dependencies (if added later)
+/vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/
+temp/
+
+# Build artifacts
+/build/
+/dist/
+
+# Development server files
+.phpunit*
+.cache/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Backup files
+*.backup
+*.bak
+
+# Test output
+/test-output/
+/coverage/
+clover.xml
+*.clover
+
+# OS generated files
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Development artifacts
+auth.db
+test_auth.db
+.authlite-server.pid
+.authlite-server.log
+
+# Static analysis cache
+.php-cs-fixer.cache
+.phpstan.cache
+.phpmd.xml
+.phpmd.html

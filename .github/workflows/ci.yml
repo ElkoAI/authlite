@@ -1,0 +1,265 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test on PHP ${{ matrix.php-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: pdo, pdo_sqlite, openssl, curl
+        coverage: none
+
+    - name: Verify PHP extensions
+      run: |
+        php -m | grep -i pdo
+        php -m | grep -i sqlite
+        php -m | grep -i openssl
+        php -m | grep -i curl
+
+    - name: Check file structure
+      run: |
+        ls -la
+        echo "Required files check:"
+        [ -f "config.php" ] && echo "✓ config.php exists" || echo "✗ config.php missing"
+        [ -f "auth.php" ] && echo "✓ auth.php exists" || echo "✗ auth.php missing"
+        [ -f "db.php" ] && echo "✓ db.php exists" || echo "✗ db.php missing"
+        [ -f "utils.php" ] && echo "✓ utils.php exists" || echo "✗ utils.php missing"
+        [ -f "oauth.php" ] && echo "✓ oauth.php exists" || echo "✗ oauth.php missing"
+
+    - name: Create test configuration
+      run: |
+        cp config.php config.local.php
+        # Update config for testing
+        sed -i "s/'create_tables' => true/'create_tables' => true/" config.local.php
+        sed -i "s|'path' => __DIR__ . '/auth.db'|'path' => __DIR__ . '/test_auth.db'|" config.local.php
+        sed -i "s/'secure' => true/'secure' => false/" config.local.php
+        sed -i "s/'display_errors' => false/'display_errors' => true/" config.local.php
+        sed -i "s/'enabled' => false/'enabled' => true/" config.local.php
+        echo "Test configuration created"
+
+    - name: Run syntax checks
+      run: |
+        echo "Running PHP syntax checks..."
+        php -l config.php
+        php -l auth.php
+        php -l db.php
+        php -l utils.php
+        php -l oauth.php
+        php -l index.php
+        php -l example.php
+        php -l test2.php
+
+    - name: Run test suite
+      run: |
+        echo "Running AuthLite test suite..."
+        php test2.php
+      env:
+        AUTHLITE_ENV: testing
+
+    - name: Clean up test files
+      if: always()
+      run: |
+        rm -f test_auth.db auth.db config.local.php .authlite-server.* 2>/dev/null || true
+
+  lint:
+    name: Code style and security checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: pdo, pdo_sqlite, openssl, curl
+
+    - name: Check for syntax errors
+      run: |
+        find . -name "*.php" -type f ! -path "./vendor/*" ! -path "./tests/_support/*" -exec php -l {} \;
+
+    - name: Check for debug statements
+      run: |
+        echo "Checking for debug statements..."
+        if grep -r "var_dump\|print_r\|die\|exit\|dd(" --include="*.php" .; then
+          echo "⚠️  Debug statements found in code"
+          exit 1
+        else
+          echo "✓ No debug statements found"
+        fi
+
+    - name: Check for security issues
+      run: |
+        echo "Running basic security checks..."
+        # Check for potential SQL injection patterns
+        if grep -r "SELECT.*\$\|INSERT.*\$\|UPDATE.*\$\|DELETE.*\$" --include="*.php" . | grep -v "prepare\|execute\|bindValue\|bindParam"; then
+          echo "⚠️  Potential SQL injection patterns found"
+          exit 1
+        else
+          echo "✓ No obvious SQL injection patterns"
+        fi
+
+        # Check for potential XSS patterns
+        if grep -r "echo.*\$\|print.*\$" --include="*.php" . | grep -v "htmlspecialchars\|htmlentities"; then
+          echo "⚠️  Potential XSS patterns found (direct output without escaping)"
+          exit 1
+        else
+          echo "✓ Output appears properly escaped"
+        fi
+
+  validate:
+    name: Validate installation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: pdo, pdo_sqlite, openssl, curl
+
+    - name: Test minimal installation
+      run: |
+        echo "Testing minimal installation..."
+        cat > test_minimal.php << 'EOF'
+<?php
+require_once 'config.php';
+require_once 'auth.php';
+
+// Initialize AuthLite
+$user = AuthLite::init();
+
+if ($user === false || is_array($user)) {
+    echo "✓ AuthLite initialized successfully\n";
+} else {
+    echo "✗ AuthLite initialization failed\n";
+    exit(1);
+}
+
+// Check database connection
+try {
+    $db = AuthLite::getDB();
+    if ($db instanceof PDO) {
+        echo "✓ Database connection established\n";
+    } else {
+        echo "✗ Database connection failed\n";
+        exit(1);
+    }
+} catch (Exception $e) {
+    echo "✗ Database error: " . $e->getMessage() . "\n";
+    exit(1);
+}
+
+// Check CSRF token
+$token = AuthLite::csrfToken();
+if (strlen($token) >= 32) {
+    echo "✓ CSRF token generated\n";
+} else {
+    echo "✗ CSRF token generation failed\n";
+    exit(1);
+}
+
+echo "✅ All minimal installation checks passed\n";
+EOF
+
+        php test_minimal.php
+        rm -f test_minimal.php test_auth.db
+
+    - name: Test example applications
+      run: |
+        echo "Testing example applications..."
+        # Check if example.php is syntactically valid
+        php -f example.php > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            echo "✓ example.php is syntactically valid"
+        else
+            echo "✗ example.php has syntax errors"
+            exit 1
+        fi
+
+        # Check if index.php is syntactically valid
+        php -f index.php > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            echo "✓ index.php is syntactically valid"
+        else
+            echo "✗ index.php has syntax errors"
+            exit 1
+        fi
+
+    - name: Check documentation
+      run: |
+        echo "Checking documentation..."
+        [ -f "README.md" ] && echo "✓ README.md exists" || echo "✗ README.md missing"
+        [ -f "LICENSE" ] && echo "✓ LICENSE exists" || echo "✗ LICENSE missing"
+        [ -f "CHANGELOG.md" ] && echo "✓ CHANGELOG.md exists" || echo "✗ CHANGELOG.md missing"
+        [ -f "CONTRIBUTING.md" ] && echo "✓ CONTRIBUTING.md exists" || echo "✗ CONTRIBUTING.md missing"
+        [ -f "SECURITY.md" ] && echo "✓ SECURITY.md exists" || echo "✗ SECURITY.md missing"
+
+        # Check README has required sections
+        if grep -q "# AuthLite" README.md; then
+            echo "✓ README has title"
+        else
+            echo "✗ README missing title"
+        fi
+
+        if grep -q "## Installation" README.md; then
+            echo "✓ README has installation section"
+        else
+            echo "✗ README missing installation section"
+        fi
+
+        if grep -q "## Usage" README.md || grep -q "## Quick Start" README.md; then
+            echo "✓ README has usage section"
+        else
+            echo "✗ README missing usage section"
+        fi
+
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [test, lint, validate]
+    if: always()
+
+    steps:
+    - name: Summary
+      run: |
+        echo "Build completed for ${{ github.repository }}"
+        echo "Event: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "SHA: ${{ github.sha }}"
+        echo ""
+        echo "Jobs completed:"
+        echo "- Test: ${{ needs.test.result }}"
+        echo "- Lint: ${{ needs.lint.result }}"
+        echo "- Validate: ${{ needs.validate.result }}"
+
+        if [[ "${{ needs.test.result }}" == "success" && "${{ needs.lint.result }}" == "success" && "${{ needs.validate.result }}" == "success" ]]; then
+          echo ""
+          echo "✅ All checks passed!"
+          echo "AuthLite is ready for use."
+        else
+          echo ""
+          echo "⚠️  Some checks failed. Please review the logs."
+          exit 1
+        fi

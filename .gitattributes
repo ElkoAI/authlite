@@ -1,0 +1,120 @@
+# Auto-detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Binary files - always treat as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.svg binary
+
+# Never treat script files as executable
+*.php -text -diff
+*.sh -text -diff
+*.bat -text -diff
+
+# Shell scripts - keep executable flag
+*.sh text eol=lf
+
+# Documentation files
+*.md text
+*.txt text
+*.rst text
+LICENSE text
+CHANGELOG.md text
+CONTRIBUTING.md text
+CODE_OF_CONDUCT.md text
+README.md text
+
+# Configuration files
+.gitattributes text
+.gitignore text
+.editorconfig text
+*.yml text
+*.yaml text
+*.json text
+*.xml text
+*.ini text
+*.cfg text
+*.conf text
+
+# Composer files
+composer.json text
+composer.lock -text diff
+
+# Source files
+*.php text diff=php
+*.html text
+*.css text
+*.js text
+
+# Test files
+*.php text diff=php
+
+# Script files
+*.sh text eol=lf
+start-server.sh text eol=lf
+start-background.sh text eol=lf
+test-server.sh text eol=lf
+
+# Database files - treat as binary to avoid corruption
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Log files - treat as binary
+*.log binary
+
+# Export-ignore files (won't be included in git archive)
+# These are development or environment-specific files
+config.local.php export-ignore
+*.db export-ignore
+test_auth.db export-ignore
+.authlite-server.pid export-ignore
+.authlite-server.log export-ignore
+composer.lock export-ignore
+/vendor/ export-ignore
+/.idea/ export-ignore
+/.vscode/ export-ignore
+*.swp export-ignore
+*.swo export-ignore
+*~ export-ignore
+.DS_Store export-ignore
+Thumbs.db export-ignore
+/tmp/ export-ignore
+/coverage/ export-ignore
+/test-output/ export-ignore
+
+# GitHub Linguist settings
+# Ensure proper language detection
+*.php linguist-language=PHP
+*.sh linguist-language=Shell
+*.md linguist-language=Markdown
+*.json linguist-language=JSON
+*.yml linguist-language=YAML
+*.yaml linguist-language=YAML
+
+# Custom diff drivers (if needed)
+[attr]php-text *.php text
+[attr]sh-text *.sh text
+
+# Merge strategy for specific files
+*.json merge=union
+*.lock -merge
+composer.lock -merge
+package-lock.json -merge
+yarn.lock -merge
+
+# Keep permissions
+*.sh -diff
+start-*.sh -diff
+test-*.sh -diff
+
+# End of file

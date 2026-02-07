@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<ruleset name="AuthLite Coding Standards">
+    <description>PHP_CodeSniffer configuration for AuthLite project</description>
+
+    <!-- Show progress and sniff codes in all reports -->
+    <arg value="sp"/>
+    <arg name="colors"/>
+
+    <!-- Include the PSR12 standard -->
+    <rule ref="PSR12"/>
+
+    <!-- Exclude some PSR12 rules we want to customize -->
+    <!-- Allow opening braces on same line for control structures -->
+    <rule ref="PSR12.ControlStructures.ControlStructureSpacing">
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace"/>
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterCloseBrace"/>
+    </rule>
+
+    <!-- Allow longer lines for readability -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="150"/>
+        </properties>
+    </rule>
+
+    <!-- Exclude vendor directory (if using Composer) -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+    <!-- Exclude test files from certain rules -->
+    <exclude-pattern>*/tests/*</exclude-pattern>
+    <exclude-pattern>*.test.php</exclude-pattern>
+
+    <!-- Include all PHP files in the src directory -->
+    <file>.</file>
+
+    <!-- Exclude certain file patterns -->
+    <exclude-pattern>*.js</exclude-pattern>
+    <exclude-pattern>*.css</exclude-pattern>
+    <exclude-pattern>*.sql</exclude-pattern>
+    <exclude-pattern>*.md</exclude-pattern>
+    <exclude-pattern>*.txt</exclude-pattern>
+    <exclude-pattern>*.xml</exclude-pattern>
+    <exclude-pattern>*.yml</exclude-pattern>
+    <exclude-pattern>*.yaml</exclude-pattern>
+    <exclude-pattern>*.json</exclude-pattern>
+    <exclude-pattern>*.dist</exclude-pattern>
+    <exclude-pattern>*.lock</exclude-pattern>
+
+    <!-- Ignore errors for missing namespace in example files -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>example.php</exclude-pattern>
+        <exclude-pattern>index.php</exclude-pattern>
+    </rule>
+
+    <!-- Custom rules for AuthLite -->
+    <rule ref="Generic.PHP.LowerCaseConstant"/>
+    <rule ref="Generic.PHP.DeprecatedFunctions"/>
+    <rule ref="Generic.Functions.FunctionCallArgumentSpacing"/>
+    <rule ref="Squiz.Strings.DoubleQuoteUsage"/>
+
+    <!-- Require type hints for method parameters and return types where possible -->
+    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
+        <severity>5</severity>
+    </rule>
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
+        <severity>5</severity>
+    </rule>
+
+    <!-- Enforce declare(strict_types=1) -->
+    <rule ref="Generic.PHP.RequireStrictTypes">
+        <severity>10</severity>
+    </rule>
+
+    <!-- Show warnings for TODO and FIXME comments -->
+    <rule ref="Generic.Commenting.Todo">
+        <type>warning</type>
+    </rule>
+
+    <!-- Exclude some rules for now (can be enabled later) -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>*</exclude-pattern>
+    </rule>
+
+    <!-- Report unused use statements -->
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Configure PHP version -->
+    <config name="minimum_supported_php_version" value="7.4"/>
+</ruleset>

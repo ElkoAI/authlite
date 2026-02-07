@@ -1,0 +1,81 @@
+{
+    "name": "yourusername/authlite",
+    "description": "Lightweight, dependency-free PHP authentication library with SQLite storage, sessions, JWT tokens, and OAuth social logins",
+    "type": "library",
+    "keywords": ["authentication", "auth", "security", "oauth", "jwt", "sqlite", "php"],
+    "homepage": "https://github.com/yourusername/authlite",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "you@example.com",
+            "homepage": "https://github.com/yourusername",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/yourusername/authlite/issues",
+        "source": "https://github.com/yourusername/authlite",
+        "docs": "https://github.com/yourusername/authlite/blob/main/README.md"
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-pdo": "*",
+        "ext-pdo_sqlite": "*",
+        "ext-openssl": "*"
+    },
+    "suggest": {
+        "ext-curl": "Required for OAuth social login functionality",
+        "ext-session": "Required for session-based authentication"
+    },
+    "autoload": {
+        "classmap": [
+            "./"
+        ],
+        "files": [
+            "auth.php",
+            "config.php",
+            "db.php",
+            "utils.php",
+            "oauth.php"
+        ]
+    },
+    "autoload-dev": {
+        "classmap": [
+            "./"
+        ]
+    },
+    "scripts": {
+        "test": "php test2.php",
+        "start": "php -S localhost:8888 index.php",
+        "test-server": "./test-server.sh",
+        "dev-server": "./start-server.sh",
+        "check": [
+            "@php --version",
+            "@test"
+        ],
+        "lint": [
+            "php -l auth.php",
+            "php -l config.php",
+            "php -l db.php",
+            "php -l utils.php",
+            "php -l oauth.php",
+            "php -l index.php",
+            "php -l example.php"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Run the test suite",
+        "start": "Start the built-in PHP server",
+        "test-server": "Run automated web server tests",
+        "dev-server": "Start development server with configuration",
+        "check": "Check PHP version and run tests",
+        "lint": "Check PHP syntax of all source files"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform-check": false
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

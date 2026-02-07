@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+         bootstrap=""
+         colors="true"
+         verbose="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         stopOnFailure="false"
+         executionOrder="random"
+         resolveDependencies="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         failOnRisky="true"
+         failOnWarning="true">
+
+    <testsuites>
+        <testsuite name="AuthLite Test Suite">
+            <directory>./tests</directory>
+            <exclude>./tests/_support</exclude>
+        </testsuite>
+
+        <testsuite name="Unit Tests">
+            <directory>./tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Integration Tests">
+            <directory>./tests/Integration</directory>
+        </testsuite>
+
+        <testsuite name="Functional Tests">
+            <directory>./tests/Functional</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage>
+        <include>
+            <directory suffix=".php">.</directory>
+        </include>
+        <exclude>
+            <directory>./vendor</directory>
+            <directory>./tests</directory>
+            <directory>./cache</directory>
+            <directory>./logs</directory>
+            <directory>./temp</directory>
+            <file>./config.local.php</file>
+            <file>./example.php</file>
+            <file>./index.php</file>
+            <file>./test2.php</file>
+            <file>./start-server.sh</file>
+            <file>./start-background.sh</file>
+            <file>./test-server.sh</file>
+        </exclude>
+        <report>
+            <clover outputFile="coverage/clover.xml"/>
+            <html outputDirectory="coverage/html" lowUpperBound="50" highLowerBound="80"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false" showOnlySummary="true"/>
+        </report>
+    </coverage>
+
+    <logging>
+        <junit outputFile="coverage/junit.xml"/>
+        <testdoxHtml outputFile="coverage/testdox.html"/>
+        <testdoxText outputFile="coverage/testdox.txt"/>
+    </logging>
+
+    <php>
+        <!-- Minimum PHP version requirement -->
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="display_startup_errors" value="1"/>
+        <ini name="log_errors" value="0"/>
+
+        <!-- AuthLite specific settings -->
+        <env name="AUTHLITE_ENV" value="testing"/>
+        <env name="AUTHLITE_TEST_DB_PATH" value="./test_auth.db"/>
+        <env name="AUTHLITE_DEBUG_ENABLED" value="1"/>
+        <env name="AUTHLITE_MASTER_KEY" value="test-master-key-12345"/>
+
+        <!-- Session settings for testing -->
+        <ini name="session.save_handler" value="files"/>
+        <ini name="session.save_path" value="/tmp"/>
+        <ini name="session.use_cookies" value="0"/>
+        <ini name="session.use_only_cookies" value="0"/>
+        <ini name="session.use_trans_sid" value="0"/>
+    </php>
+
+    <source>
+        <include>
+            <directory suffix=".php">.</directory>
+        </include>
+        <exclude>
+            <directory>./vendor</directory>
+            <directory>./tests</directory>
+            <directory>./cache</directory>
+            <directory>./logs</directory>
+            <directory>./temp</directory>
+            <file>./config.local.php</file>
+            <file>./example.php</file>
+            <file>./index.php</file>
+            <file>./test2.php</file>
+        </exclude>
+    </source>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">.</directory>
+            <exclude>
+                <directory>./vendor</directory>
+                <directory>./tests</directory>
+                <directory>./cache</directory>
+                <directory>./logs</directory>
+                <directory>./temp</directory>
+                <file>./config.local.php</file>
+                <file>./example.php</file>
+                <file>./index.php</file>
+                <file>./test2.php</file>
+                <file>./start-server.sh</file>
+                <file>./start-background.sh</file>
+                <file>./test-server.sh</file>
+            </exclude>
+        </whitelist>
+    </filter>
+
+</phpunit>
+```
+
+**Note:** This configuration file provides a comprehensive PHPUnit setup for the AuthLite project. Since AuthLite currently uses a custom test runner (`test2.php`), this configuration is provided for users who wish to write PHPUnit-style tests in the future.
+
+**Key Features:**
+1. **PHPUnit 9.6+ compatibility** - Works with PHP 7.4+
+2. **Multiple test suites** - Organized by test type (Unit, Integration, Functional)
+3. **Code coverage** - Generates Clover, HTML, and text reports
+4. **Testing environment** - Configures environment variables for testing
+5. **Exclusions** - Properly excludes non-source files from coverage
+
+**Usage:**
+1. Install PHPUnit via Composer: `composer require --dev phpunit/phpunit`
+2. Create tests in the `./tests/` directory
+3. Run tests: `./vendor/bin/phpunit`
+
+**Current Test Strategy:**
+- The existing custom test runner (`test2.php`) can be used without PHPUnit
+- This configuration enables gradual migration to PHPUnit if desired
+- Both test approaches can coexist
+
+**Environment Variables:**
+- `AUTHLITE_ENV`: Set to "testing" for test environment
+- `AUTHLITE_TEST_DB_PATH`: Path for test database
+- `AUTHLITE_DEBUG_ENABLED`: Enable debug mode during tests
+- `AUTHLITE_MASTER_KEY`: Test master key for debug vault
+
+The configuration is ready to use when PHPUnit is installed and tests are created in the appropriate directories.
